@@ -1,0 +1,5 @@
+<?xml version='1.0' encoding='utf-8'?>
+<tomcat-users>
+  <role rolename="apachehop"/>
+  <user username="admin" password="zcby8I0PeG1uprpYO4KR" roles="apachehop" />
+</tomcat-users>

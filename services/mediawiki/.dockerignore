@@ -1,0 +1,19 @@
+# Git and VCS
+.git/
+.gitignore
+LocalSettings.php
+
+# PHP vendor (if you include composer installs locally)
+vendor/
+
+# Cache
+cache/
+tmp/
+
+# IDE stuff
+.vscode/
+.idea/
+
+# OS stuff
+.DS_Store
+Thumbs.db

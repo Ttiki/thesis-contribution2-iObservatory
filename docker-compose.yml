@@ -1,0 +1,239 @@
+networks:
+  observatory_net:
+    driver: bridge
+
+volumes:
+  mariadb:
+  dw-data:
+  pgadmin-volume:
+  html:
+  certs:
+  acme:
+
+services:
+
+  # ───── DATABASES ─────
+  mariadb:
+    image: mariadb:11.4
+    container_name: mariadb
+    restart: always
+    networks:
+      - observatory_net
+    expose:
+      - "3306"
+    volumes:
+      - mariadb:/var/lib/mysql
+      - ./services/mariadb/_initdb.mariadb/:/docker-entrypoint-initdb.d/
+    env_file:
+      - .env
+      - ./services/mariadb/.env
+
+  postgres:
+    image: postgres:18.0-alpine
+    container_name: postgres
+    restart: unless-stopped
+    networks:
+      - observatory_net
+    expose:
+      - "5432"
+    ports:
+      - "5432"
+    volumes:
+      - dw-data:/var/lib/postgresql/data/
+      - ./services/strapi/strapi.dump:/tmp/strapi.dump
+      - ./services/postgres/_initdb.pg/:/docker-entrypoint-initdb.d/
+    env_file:
+      - .env
+      - ./services/postgres/.env
+
+  # ───── BACKEND / SERVICES ─────
+  mediawiki:
+    build:
+      context: ./services/mediawiki
+      dockerfile: MediaWiki.Dockerfile
+    container_name: mediawiki
+    restart: always
+    networks:
+      - observatory_net
+    expose:
+      - "8080"
+    volumes:
+      - ./services/mediawiki/LocalSettings.php:/var/www/html/LocalSettings.php:ro
+      - ./services/mediawiki/composer.local.json:/var/www/html/composer.local.json
+      - ./services/mediawiki/images/:/var/www/html/images/:rw
+      - ./services/mediawiki/resources/assets/:/var/www/html/resources/assets/
+      - ./services/mediawiki/extensions/:/var/www/html/extensions/
+      - ./services/mediawiki/mediawiki/:/var/www/html/mediawiki/:ro
+    env_file:
+      - .env
+      - ./services/mediawiki/.env
+    environment:
+      VIRTUAL_HOST: ${DOMAIN_NAME}
+      VIRTUAL_PATH: /
+      VIRTUAL_PORT: "80"
+      LETSENCRYPT_HOST: ${DOMAIN_NAME}
+      LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL}
+    depends_on:
+      - mariadb
+      - postgres
+
+  hop-server:
+    image: apache/hop:latest
+    container_name: hop-server
+    restart: unless-stopped
+    ports:
+      - "8080"
+    networks:
+      - observatory_net
+    volumes:
+      - ./services/etl/hop-server/projects:/project
+      - ./services/etl/hop-server/tomcat/config:/config
+    env_file:
+      - .env
+      - ./services/etl/hop-server/.env
+    environment:
+      VIRTUAL_HOST: ${DOMAIN_NAME}
+      VIRTUAL_PATH: /hop/
+      VIRTUAL_DEST: /server/
+      VIRTUAL_PORT: "8080"
+      LETSENCRYPT_HOST: ${DOMAIN_NAME}
+      LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL}
+    depends_on:
+      - postgres
+
+  hop-web:
+    image: apache/hop-web:latest
+    container_name: hop-web
+    restart: unless-stopped
+    ports:
+      - "8080"
+    networks:
+      - observatory_net
+    volumes:
+      - ./services/etl/hop-web/projects:/project
+      - ./services/etl/hop-web/tomcat/config:/config
+    env_file:
+      - .env
+      - ./services/etl/hop-web/.env
+    environment:
+      VIRTUAL_HOST: ${DOMAIN_NAME}
+      VIRTUAL_PATH: /hop/
+      VIRTUAL_DEST: /
+      VIRTUAL_PORT: "8080"
+      LETSENCRYPT_HOST: ${DOMAIN_NAME}
+      LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL}
+    depends_on:
+      - postgres
+
+  # ───── ADMIN TOOLS ─────
+  phpmyadmin:
+    image: phpmyadmin:5.2.1
+    container_name: phpmyadmin
+    restart: always
+    networks:
+      - observatory_net
+    expose:
+      - "80"
+    env_file:
+      - .env
+      - ./services/pma/.env
+      - ./services/mariadb/.env
+    environment:
+      VIRTUAL_HOST: ${DOMAIN_NAME}
+      VIRTUAL_PATH: /pma/
+      VIRTUAL_DEST: /pma/
+      VIRTUAL_PORT: "80"
+      LETSENCRYPT_HOST: ${DOMAIN_NAME}
+      LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL}
+      SCRIPT_NAME: /pma
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: pgadmin
+    restart: unless-stopped
+    networks:
+      - observatory_net
+    expose:
+      - "8080"
+    volumes:
+      - pgadmin-volume:/var/lib/pgadmin
+    env_file:
+      - .env
+      - ./services/postgres/.env
+      - ./services/pga/.env
+    environment:
+      VIRTUAL_HOST: ${DOMAIN_NAME}
+      VIRTUAL_PATH: /pga/
+      VIRTUAL_DEST: /pga/
+      VIRTUAL_PORT: "80"
+      LETSENCRYPT_HOST: ${DOMAIN_NAME}
+      LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL}
+      PROXY_X_PREFIX_COUNT: 1
+      PGADMIN_LISTEN_PORT: 80
+      SCRIPT_NAME: /pga
+    depends_on:
+      - postgres
+
+  # ───── STORAGE ─────
+  # minio:
+  #   image: minio/minio:latest
+  #   container_name: minio
+  #   restart: always
+  #   networks:
+  #     - observatory_net
+  #   ports:
+  #     - "9000"
+  #     - "9001"
+  #   volumes:
+  #     - ./services/minio/data:/data
+  #   env_file:
+  #     - .env
+  #     - ./services/minio/.env
+  #   environment:
+  #     VIRTUAL_HOST: ${DOMAIN_NAME}
+  #     VIRTUAL_PATH: /minio/
+  #     VIRTUAL_DEST: /
+  #     VIRTUAL_PORT: "9001"
+  #     MINIO_BROWSER_REDIRECT_URL: https://unitapedia.univ-unita.eu/minio
+  #   command: server /data --console-address ":9001"
+
+  # ───── REVERSE PROXY ─────
+  nginx-proxy:
+    image: nginxproxy/nginx-proxy
+    container_name: nginx-proxy
+    restart: always
+    networks:
+      - observatory_net
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - certs:/etc/nginx/certs
+      - html:/usr/share/nginx/html
+    depends_on:
+      - mediawiki
+      - phpmyadmin
+      - pgadmin
+      # - strapi
+      # - hop-server
+      - hop-web
+      - minio
+
+  acme-companion:
+    image: nginxproxy/acme-companion
+    container_name: acme-companion
+    restart: always
+    networks:
+      - observatory_net
+    volumes_from:
+      - nginx-proxy
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - certs:/etc/acme.sh
+      - html:/usr/share/nginx/html
+    environment:
+      DEFAULT_EMAIL: ${LETSENCRYPT_EMAIL}
+      NGINX_PROXY_CONTAINER: nginx-proxy
+    depends_on:
+      - nginx-proxy

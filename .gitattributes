@@ -1,0 +1,53 @@
+# Normalize text files
+*.yml     text eol=lf
+*.yaml    text eol=lf
+*.env     text eol=lf
+*.md      text eol=lf
+*.json    text eol=lf
+*.js      text eol=lf
+*.ts      text eol=lf
+*.css     text eol=lf
+*.scss    text eol=lf
+*.html    text eol=lf
+*.php     text eol=lf
+*.py      text eol=lf
+*.sh      text eol=lf
+*.ini     text eol=lf
+*.conf    text eol=lf
+*.xml     text eol=lf
+
+# Strapi / Node.js specific
+*.lock    text eol=lf
+*.tsbuildinfo text eol=lf
+.yarn/*   text eol=lf
+
+# MediaWiki and config
+*.php     text eol=lf
+composer.* text eol=lf
+
+# Docker and scripts
+Dockerfile text eol=lf
+*.Dockerfile text eol=lf
+*.sh      text eol=lf
+
+# Prevent Git from treating these as binary
+*.json    diff=json
+*.yml     diff=plain
+*.yaml    diff=plain
+*.env     diff=plain
+
+# Treat large binaries or compressed files properly
+*.zip     binary
+*.gz      binary
+*.tar     binary
+*.7z      binary
+*.rar     binary
+*.jpg     binary
+*.jpeg    binary
+*.png     binary
+*.ico     binary
+*.mp4     binary
+*.pdf     binary
+
+# GitHub linguist override (optional)
+# docs/* linguist-documentation

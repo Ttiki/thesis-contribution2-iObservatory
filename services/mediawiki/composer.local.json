@@ -1,0 +1,16 @@
+{
+    "require": {
+        "mediawiki/semantic-media-wiki": "~7.2.0",
+        "mediawiki/maps": "~14.1.1",
+        "mediawiki/semantic-result-formats": "~5.2.0",
+        "mediawiki/page-forms": "~6.0.10",
+        "mediawiki/semantic-forms-select": "~5.0.0",
+        "professional-wiki/modern-timeline":"~4.0",
+        "professional-wiki/network":"~4.0",
+        "mediawiki/semantic-compound-queries": "~4.0.1",
+        "mediawiki/cargo":"~3.9.3",
+        "mediawiki/semantic-cite": "~5.0.0",
+        "mediawiki/semantic-scribunto": "~3.0.0",
+        "starcitizentools/tabber-neue": "~4.0.2"
+    }
+}
