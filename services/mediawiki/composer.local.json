@@ -3,7 +3,7 @@
         "mediawiki/semantic-media-wiki": "~7.2.0",
         "mediawiki/maps": "~14.1.1",
         "mediawiki/semantic-result-formats": "~5.2.0",
-        "mediawiki/page-forms": "~6.0.10",
+        "mediawiki/page-forms": "~6.0.11",
         "mediawiki/semantic-forms-select": "~5.0.0",
         "professional-wiki/modern-timeline":"~4.0",
         "professional-wiki/network":"~4.0",
