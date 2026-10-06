@@ -215,8 +215,7 @@ services:
       - mediawiki
       - phpmyadmin
       - pgadmin
-      # - strapi
-      # - hop-server
+      - hop-server
       - hop-web
       - minio
 

@@ -173,27 +173,27 @@ services:
       - postgres
 
   # ───── STORAGE ─────
-  # minio:
-  #   image: minio/minio:latest
-  #   container_name: minio
-  #   restart: always
-  #   networks:
-  #     - observatory_net
-  #   ports:
-  #     - "9000"
-  #     - "9001"
-  #   volumes:
-  #     - ./services/minio/data:/data
-  #   env_file:
-  #     - .env
-  #     - ./services/minio/.env
-  #   environment:
-  #     VIRTUAL_HOST: ${DOMAIN_NAME}
-  #     VIRTUAL_PATH: /minio/
-  #     VIRTUAL_DEST: /
-  #     VIRTUAL_PORT: "9001"
-  #     MINIO_BROWSER_REDIRECT_URL: https://unitapedia.univ-unita.eu/minio
-  #   command: server /data --console-address ":9001"
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    restart: always
+    networks:
+      - observatory_net
+    ports:
+      - "9000"
+      - "9001"
+    volumes:
+      - ./services/minio/data:/data
+    env_file:
+      - .env
+      - ./services/minio/.env
+    environment:
+      VIRTUAL_HOST: ${DOMAIN_NAME}
+      VIRTUAL_PATH: /minio/
+      VIRTUAL_DEST: /
+      VIRTUAL_PORT: "9001"
+      MINIO_BROWSER_REDIRECT_URL: https://unitapedia.univ-unita.eu/minio
+    command: server /data --console-address ":9001"
 
   # ───── REVERSE PROXY ─────
   nginx-proxy:
@@ -213,8 +213,7 @@ services:
       - mediawiki
       - phpmyadmin
       - pgadmin
-      # - strapi
-      # - hop-server
+      - hop-server
       - hop-web
       - minio
 
