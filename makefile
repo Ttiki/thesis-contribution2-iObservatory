@@ -244,6 +244,8 @@ credentials: ## 🔐 Generate missing secure credentials
 	NEW_UPGRADE_KEY=$$(openssl rand -base64 12 | tr -d '=+/'); \
 	NEW_MEDIAWIKI_DB_PWD=$$(openssl rand -base64 24 | tr -d '=+/' | cut -c1-20); \
 	NEW_MARIADB_ROOT_PWD=$$(openssl rand -base64 24 | tr -d '=+/' | cut -c1-20); \
+	NEW_POSTGRES_PWD=$$(openssl rand -base64 24 | tr -d '=+/' | cut -c1-20); \
+	NEW_PGA_PWD=$$(openssl rand -base64 24 | tr -d '=+/' | cut -c1-20); \
 	\
 	if grep -q '^MEDIAWIKI_ADMIN_PWD=$$' services/mediawiki/.env; then \
 		$(SED_INPLACE) "s/^MEDIAWIKI_ADMIN_PWD=.*/MEDIAWIKI_ADMIN_PWD=$$NEW_ADMIN_PWD/" \
@@ -275,8 +277,8 @@ credentials: ## 🔐 Generate missing secure credentials
 		printf "     $(GREEN)✔$(RESET) HOP admin password generated\n"; \
 	else \
 		printf "     $(YELLOW)•$(RESET) HOP admin password already exists\n"; \
-	fi;\
-  \
+	fi; \
+	\
 	if grep -q '^MEDIAWIKI_DB_PWD=$$' services/mediawiki/.env; then \
 		$(SED_INPLACE) "s/^MEDIAWIKI_DB_PWD=.*/MEDIAWIKI_DB_PWD=$$NEW_MEDIAWIKI_DB_PWD/" \
 			services/mediawiki/.env; \
@@ -299,9 +301,23 @@ credentials: ## 🔐 Generate missing secure credentials
 		printf "     $(GREEN)✔$(RESET) MariaDB root password generated\n"; \
 	else \
 		printf "     $(YELLOW)•$(RESET) MariaDB root password already exists\n"; \
+	fi; \
+	\
+	if grep -q '^POSTGRES_PASSWORD=$$' services/postgres/.env; then \
+		$(SED_INPLACE) "s/^POSTGRES_PASSWORD=.*/POSTGRES_PASSWORD=$$NEW_POSTGRES_PWD/" \
+			services/postgres/.env; \
+		printf "     $(GREEN)✔$(RESET) PostgreSQL password generated\n"; \
+	else \
+		printf "     $(YELLOW)•$(RESET) PostgreSQL password already exists\n"; \
+	fi; \
+	\
+	if grep -q '^PGADMIN_DEFAULT_PASSWORD=$$' services/pga/.env; then \
+		$(SED_INPLACE) "s/^PGADMIN_DEFAULT_PASSWORD=.*/PGADMIN_DEFAULT_PASSWORD=$$NEW_PGA_PWD/" \
+			services/pga/.env; \
+		printf "     $(GREEN)✔$(RESET) pgAdmin password generated\n"; \
+	else \
+		printf "     $(YELLOW)•$(RESET) pgAdmin password already exists\n"; \
 	fi;
-
-
 
 	$(call success,Credential check complete)
 
