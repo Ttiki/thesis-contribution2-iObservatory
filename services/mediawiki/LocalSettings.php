@@ -30,7 +30,12 @@ $wgUploadDirectory = "$IP/images";
 
 # Server settings
 $domainName = getenv('DOMAIN_NAME');
-$isLocalDevelopment = in_array($domainName, [ 'localhost', '127.0.0.1' ], true);
+$isLocalDevelopment = in_array(
+    $domainName,
+    [ 'localhost', '127.0.0.1', '10.3.17.233' ],
+    true
+);
+
 $wgServer = ( $isLocalDevelopment ? 'http://' : 'https://' ) . $domainName;
 
 # Database settings
