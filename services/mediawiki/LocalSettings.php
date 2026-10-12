@@ -294,7 +294,6 @@ wfLoadExtension('TitleBlacklist');
 wfLoadExtension('Translate');
 wfLoadExtension('UniversalLanguageSelector');
 wfLoadExtension( 'Variables' );
-wfLoadExtension( 'VisualEditor' );
 wfLoadExtension('Widgets');
 wfLoadExtension('WikiEditor');
 
@@ -341,5 +340,5 @@ $wgLegacyEncoding = 'utf-8';
 
 $wgExternalDataAllowGetters = true;
 ## Include External data sources (queries) here in these includes to clean the code
-
+include("mediawiki/query_raw.php");
 
